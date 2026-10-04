@@ -1,0 +1,5 @@
+# FlashREINFORCE core objective plus optional negative-token filtering for ALFWorld.
+UPSTREAM=https://github.com/ji-huazhong/verl.git
+MODE=pinned_commit
+COMMIT=f78c319e77e4895f769c0368e398ca91137788d2
+PIP_INSTALL=pip install verl@git+https://github.com/ji-huazhong/verl.git@f78c319e77e4895f769c0368e398ca91137788d2

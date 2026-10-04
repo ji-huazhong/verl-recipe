@@ -1,0 +1,35 @@
+hydra:
+  searchpath:
+    - pkg://verl.trainer.config
+  run:
+    dir: ${trainer.default_local_dir}/hydra
+
+defaults:
+  - ppo_trainer
+  - base
+  - _self_
+
+data:
+  train_files: ${oc.env:FLASH_DATA_DIR}/r1/train.parquet
+  val_files: ${oc.env:FLASH_DATA_DIR}/r1/val.parquet
+  train_max_samples: 1460
+  max_prompt_length: 1024
+  max_response_length: 8192
+
+actor_rollout_ref:
+  model:
+    path: deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B
+  rollout:
+    max_model_len: 9216
+    val_kwargs:
+      n: 32
+      temperature: 0.6
+      top_p: 0.95
+
+trainer:
+  experiment_name: r1_math
+  total_epochs: 350
+  test_freq: 128
+  v1:
+    separate_async:
+      num_warmup_batches: 4

@@ -1,0 +1,45 @@
+hydra:
+  searchpath:
+    - pkg://verl.trainer.config
+  run:
+    dir: ${trainer.default_local_dir}/hydra
+
+defaults:
+  - ppo_trainer
+  - base
+  - _self_
+
+data:
+  train_files: ${oc.env:FLASH_DATA_DIR}/alfworld/train.parquet
+  val_files: ${oc.env:FLASH_DATA_DIR}/alfworld/val.parquet
+  train_max_samples: 1024
+  train_batch_size: 64
+  max_prompt_length: 2048
+  max_response_length: 16384
+
+actor_rollout_ref:
+  model:
+    path: Qwen/Qwen2.5-7B-Instruct
+  actor:
+    calculate_entropy: true
+    entropy_from_logits_with_chunking: true
+    policy_loss:
+      flash_reinforce_kl_threshold: 0.001
+      flash_reinforce_neg_topq: 0.9
+    optim:
+      lr_scheduler_type: constant
+      lr_warmup_steps_ratio: 0.0
+  rollout:
+    max_model_len: 16384
+    agent:
+      default_agent_loop: flash_alfworld
+      agent_loop_config_path: ${oc.env:FLASH_RECIPE_DIR}/config/agents.yaml
+    val_kwargs:
+      n: 3
+      temperature: 1.0
+      top_p: 0.7
+
+trainer:
+  experiment_name: alfworld
+  total_epochs: 20
+  test_freq: 40

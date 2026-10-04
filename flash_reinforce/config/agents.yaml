@@ -1,0 +1,19 @@
+- name: flash_python_7b
+  _target_: flash_reinforce.agents.PythonToolAgentLoop
+  max_generated_tokens: 6144
+  max_tokens_per_turn: 6144
+
+- name: flash_python_moe
+  _target_: flash_reinforce.agents.PythonToolAgentLoop
+  max_generated_tokens: null
+  max_tokens_per_turn: 8192
+
+- name: flash_python_moe20
+  _target_: flash_reinforce.agents.PythonToolAgentLoop
+  max_generated_tokens: 14336
+  max_tokens_per_turn: 14336
+
+- name: flash_alfworld
+  _target_: flash_reinforce.agents.ALFWorldAgentLoop
+  max_actions: 50
+  max_generated_tokens: 8192

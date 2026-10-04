@@ -1,0 +1,98 @@
+algorithm:
+  adv_estimator: flash_reinforce
+  use_kl_in_reward: false
+  rollout_correction:
+    rollout_is: null
+    rollout_rs: null
+    bypass_mode: false
+
+critic:
+  enable: false
+
+data:
+  train_batch_size: 128
+  gen_batch_size: 16
+  max_prompt_length: 2048
+  filter_overlong_prompts: false
+  truncation: error
+  seed: 42
+
+actor_rollout_ref:
+  hybrid_engine: false
+  model:
+    use_remove_padding: true
+    enable_gradient_checkpointing: true
+  actor:
+    strategy: fsdp2
+    policy_loss:
+      loss_mode: flash_reinforce
+      flash_reinforce_kl_threshold: 0.003
+      flash_reinforce_neg_topq: 1.0
+    loss_agg_mode: seq-mean-token-mean
+    ppo_mini_batch_size: ${data.train_batch_size}
+    ppo_epochs: 1
+    use_dynamic_bsz: true
+    ppo_micro_batch_size_per_gpu: 1
+    ppo_max_token_len_per_gpu: ${actor_rollout_ref.rollout.max_model_len}
+    use_kl_loss: false
+    entropy_coeff: 0.0
+    grad_clip: 1.0
+    optim:
+      optimizer: AdamW
+      lr: 1.0e-6
+      weight_decay: 0.1
+      lr_scheduler_type: cosine
+      lr_warmup_steps_ratio: 0.03
+      min_lr_ratio: 0.1
+      clip_grad: 1.0
+    fsdp_config:
+      dtype: bfloat16
+      model_dtype: fp32
+  rollout:
+    name: vllm
+    mode: async
+    n: 1
+    calculate_log_probs: true
+    temperature: 1.0
+    top_p: 1.0
+    top_k: -1
+    dtype: bfloat16
+    gpu_memory_utilization: 0.9
+    nnodes: 1
+    n_gpus_per_node: ${oc.env:ROLLOUT_GPUS,6}
+    tensor_model_parallel_size: ${oc.env:ROLLOUT_TP,1}
+    log_prob_use_dynamic_bsz: true
+    log_prob_max_token_len_per_gpu: ${actor_rollout_ref.rollout.max_model_len}
+    max_num_batched_tokens: ${actor_rollout_ref.rollout.max_model_len}
+    checkpoint_engine:
+      backend: nccl
+    val_kwargs:
+      do_sample: true
+      n: 4
+      temperature: 0.7
+      top_p: 0.7
+
+reward:
+  custom_reward_function:
+    path: ${oc.env:FLASH_RECIPE_DIR}/reward.py
+    name: compute_score
+
+trainer:
+  use_v1: true
+  nnodes: 1
+  n_gpus_per_node: ${oc.env:TRAIN_GPUS,2}
+  total_epochs: 68
+  project_name: flash_reinforce
+  default_local_dir: ${oc.env:FLASH_OUTPUT_DIR,checkpoints/flash_reinforce}/${trainer.experiment_name}
+  resume_mode: disable
+  val_before_train: true
+  test_freq: 100
+  save_freq: 100
+  logger: [console, wandb]
+  v1:
+    trainer_mode: separate_async
+    separate_async:
+      parameter_sync_step: 1
+      num_warmup_batches: 1
+    sampler:
+      max_off_policy_threshold: null

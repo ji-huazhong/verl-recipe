@@ -72,6 +72,7 @@ The script requires only `bash`, `git`, `awk`, and `pip`/`pip3` on `PATH`. It do
 | entropy | [`recipe/entropy/REQUIRED_VERL.txt`](entropy/REQUIRED_VERL.txt) |
 | fapo | [`recipe/fapo/REQUIRED_VERL.txt`](fapo/REQUIRED_VERL.txt) |
 | fault_recover | [`recipe/fault_recover/REQUIRED_VERL.txt`](fault_recover/REQUIRED_VERL.txt) |
+| [flash_reinforce](flash_reinforce/README.md) | [REQUIRED_VERL.txt](flash_reinforce/REQUIRED_VERL.txt) |
 | flash_rl_ascend | [`recipe/flash_rl_ascend/REQUIRED_VERL.txt`](flash_rl_ascend/REQUIRED_VERL.txt) |
 | flowrl | [`recipe/flowrl/REQUIRED_VERL.txt`](flowrl/REQUIRED_VERL.txt) |
 | [fully_async_policy](fully_async_policy/README.md) | [`recipe/fully_async_policy/REQUIRED_VERL.txt`](fully_async_policy/REQUIRED_VERL.txt) |
@@ -100,6 +101,8 @@ The script requires only `bash`, `git`, `awk`, and `pip`/`pip3` on `PATH`. It do
 | verl_tinker | [`recipe/verl_tinker/REQUIRED_VERL.txt`](verl_tinker/REQUIRED_VERL.txt) |
 
 ## Available Recipes (high level)
+
+- [flash_reinforce](./flash_reinforce/): FlashREINFORCE task recipes for mathematical reasoning, Python-tool use, and ALFWorld with native verl asynchronous training.
 
 - [retool](https://github.com/verl-project/verl-recipe/tree/main/retool): Reinforcement Learning for Strategic Tool Use in LLMs
 - [langgraph_agent](https://github.com/verl-project/verl-recipe/tree/main/langgraph_agent): A tiny example to demonstrate multi-turn rollout with [LangGraph ReactAgent](https://langchain-ai.github.io/langgraph/agents/overview/) to solve math expression.

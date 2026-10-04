@@ -1,0 +1,42 @@
+hydra:
+  searchpath:
+    - pkg://verl.trainer.config
+  run:
+    dir: ${trainer.default_local_dir}/hydra
+
+defaults:
+  - ppo_trainer
+  - base
+  - _self_
+
+data:
+  train_files: ${oc.env:FLASH_DATA_DIR}/tool/train.parquet
+  val_files: ${oc.env:FLASH_DATA_DIR}/tool/val.parquet
+  train_max_samples: 7500
+  max_response_length: 8192
+  apply_chat_template_kwargs:
+    enable_thinking: false
+
+actor_rollout_ref:
+  model:
+    path: Qwen/Qwen2.5-7B-Instruct
+  actor:
+    policy_loss:
+      flash_reinforce_kl_threshold: 0.001
+  rollout:
+    max_model_len: 8192
+    agent:
+      default_agent_loop: flash_python_7b
+      agent_loop_config_path: ${oc.env:FLASH_RECIPE_DIR}/config/agents.yaml
+    multi_turn:
+      enable: true
+      max_assistant_turns: 10
+      max_parallel_calls: 1
+      max_tool_response_length: 4096
+      function_tool_path: ${oc.env:FLASH_RECIPE_DIR}/python_tool.py
+      format: hermes
+
+trainer:
+  experiment_name: qwen7b_tool
+  total_epochs: 68
+  test_freq: 100

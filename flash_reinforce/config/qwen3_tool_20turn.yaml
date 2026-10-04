@@ -1,0 +1,48 @@
+hydra:
+  searchpath:
+    - pkg://verl.trainer.config
+  run:
+    dir: ${trainer.default_local_dir}/hydra
+
+defaults:
+  - ppo_trainer
+  - base
+  - _self_
+
+data:
+  train_files: ${oc.env:FLASH_DATA_DIR}/tool/train.parquet
+  val_files: ${oc.env:FLASH_DATA_DIR}/tool/val.parquet
+  train_max_samples: 7500
+  max_response_length: 16384
+  apply_chat_template_kwargs:
+    enable_thinking: false
+
+actor_rollout_ref:
+  model:
+    path: Qwen/Qwen3-30B-A3B
+  actor:
+    policy_loss:
+      flash_reinforce_kl_threshold: 0.003
+  rollout:
+    max_model_len: 16384
+    n_gpus_per_node: ${oc.env:ROLLOUT_GPUS,8}
+    tensor_model_parallel_size: ${oc.env:ROLLOUT_TP,2}
+    agent:
+      default_agent_loop: flash_python_moe20
+      agent_loop_config_path: ${oc.env:FLASH_RECIPE_DIR}/config/agents.yaml
+    multi_turn:
+      enable: true
+      max_assistant_turns: 20
+      max_parallel_calls: 1
+      max_tool_response_length: 4096
+      function_tool_path: ${oc.env:FLASH_RECIPE_DIR}/python_tool.py
+      format: hermes
+
+trainer:
+  experiment_name: qwen3_tool_20turn
+  n_gpus_per_node: ${oc.env:TRAIN_GPUS,8}
+  v1:
+    separate_async:
+      num_warmup_batches: 4
+  total_epochs: 17
+  test_freq: 100
